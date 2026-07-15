@@ -4,13 +4,35 @@
 
 from odoo.tests.common import TransactionCase
 
-
 class TestModule(TransactionCase):
     def setUp(self):
         super().setUp()
         self.partner = self.env.ref("base.res_partner_12")
         self.product = self.env.ref("product.consu_delivery_01")
         self.product.invoice_policy = "order"
+
+        # --- FIX PARA ODOO 19: INYECTAR CUENTAS E IMPUESTOS AL PRODUCTO DEMO ---
+        company_id = self.env.company.id
+        
+        # 1. Buscamos una cuenta de ingresos y gastos válida
+        income_account = self.env['account.account'].search([
+            ('company_ids', 'in', company_id),
+            ('account_type', '=', 'income')
+        ], limit=1)
+        
+        if income_account:
+            self.product.property_account_income_id = income_account.id
+            self.product.property_account_expense_id = income_account.id
+
+        # 2. Buscamos un impuesto de ventas válido
+        tax = self.env['account.tax'].search([
+            ('company_id', '=', company_id),
+            ('type_tax_use', '=', 'sale')
+        ], limit=1)
+        
+        if tax:
+            self.product.taxes_id = [(6, 0, [tax.id])]
+        # -----------------------------------------------------------------------
 
     def test_main(self):
         # Create Pricelist
