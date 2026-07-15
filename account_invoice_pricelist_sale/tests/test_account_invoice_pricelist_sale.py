@@ -11,19 +11,22 @@ from odoo.addons.account_invoice_pricelist.tests.test_account_move_pricelist imp
 
 class TestAccountInvoicePricelistSale(TestAccountMovePricelist):
     def test_invoice_create_from_sale(self):
-        income_account = self.env['account.account'].search([
-            ('company_ids', 'in', self.env.company.id),
-            ('account_type', '=', 'income')
-        ], limit=1)
+        income_account = self.env["account.account"].search(
+            [
+                ("company_ids", "in", self.env.company.id),
+                ("account_type", "=", "income"),
+            ],
+            limit=1,
+        )
 
         if income_account:
             self.product_product.property_account_income_id = income_account.id
             self.product_product.property_account_expense_id = income_account.id
 
-        tax = self.env['account.tax'].search([
-            ('company_id', '=', self.env.company.id),
-            ('type_tax_use', '=', 'sale')
-        ], limit=1)
+        tax = self.env["account.tax"].search(
+            [("company_id", "=", self.env.company.id), ("type_tax_use", "=", "sale")],
+            limit=1,
+        )
 
         if tax:
             self.product_product.taxes_id = [Command.set([tax.id])]
